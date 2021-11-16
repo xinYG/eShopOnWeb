@@ -1,0 +1,45 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- checkout: none
+
+
+- task: CmdLine@2
+  inputs:
+    script: 'curl -LJ -o $(System.DefaultWorkingDirectory)/OpenJDK8_jre_x64_windows.zip https://downloads.whitesourcesoftware.com/ws-cli/jre/OpenJDK8_jre_x64_windows.zip'
+
+
+- task: JavaToolInstaller@0
+  inputs:
+    versionSpec: '8'
+    jdkArchitectureOption: 'x64'
+    jdkSourceOption: 'LocalDirectory'
+    jdkFile: '$(System.DefaultWorkingDirectory)/OpenJDK8_jre_x64_windows.zip'
+    jdkDestinationDirectory: '$(System.DefaultWorkingDirectory)/jre'
+    cleanDestinationDirectory: true
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      git clone https://github.com/hugh-whitesource/aspnetcore-realworld-example-app.git
+      cd aspnetcore-realworld-example-app
+      git checkout 93ed4ba61b600509b62ace9cf57d3c7ccb9f2c96
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'
+
+- task: WhiteSource@21
+  inputs:
+    projectName: 'AZDO_aspnetcore-721'
