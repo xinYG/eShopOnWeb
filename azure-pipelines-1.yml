@@ -1,0 +1,35 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
+- script: |
+    curl -LJO https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar
+    echo Unified Agent downloaded successfully
+    java -jar wss-unified-agent.jar -loglevel debug
+  env:
+    WS_APIKEY: $(APIKEY)
+    WS_WSS_URL: $(WSS_URL)
+    WS_PRODUCTNAME: Cases
+    WS_PROJECTNAME: 83077
+    WS_GENERATESCANREPORT: True
+    WS_SCANREPORTTIMEOUTMINUTES: 1
+  displayName: 'WhiteSource Unified Agent Scan'
