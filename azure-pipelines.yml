@@ -13,33 +13,45 @@ steps:
 - checkout: none
 
 
-- task: CmdLine@2
-  inputs:
-    script: 'curl -LJ -o $(System.DefaultWorkingDirectory)/OpenJDK8_jre_x64_windows.zip https://downloads.whitesourcesoftware.com/ws-cli/jre/OpenJDK8_jre_x64_windows.zip'
+# - task: CmdLine@2
+#   inputs:
+#     script: 'curl -LJ -o $(System.DefaultWorkingDirectory)/OpenJDK8_jre_x64_windows.zip https://downloads.whitesourcesoftware.com/ws-cli/jre/OpenJDK8_jre_x64_windows.zip'
 
 
-- task: JavaToolInstaller@0
-  inputs:
-    versionSpec: '8'
-    jdkArchitectureOption: 'x64'
-    jdkSourceOption: 'LocalDirectory'
-    jdkFile: '$(System.DefaultWorkingDirectory)/OpenJDK8_jre_x64_windows.zip'
-    jdkDestinationDirectory: '$(System.DefaultWorkingDirectory)/jre'
-    cleanDestinationDirectory: true
+# - task: JavaToolInstaller@0
+#   inputs:
+#     versionSpec: '8'
+#     jdkArchitectureOption: 'x64'
+#     jdkSourceOption: 'LocalDirectory'
+#     jdkFile: '$(System.DefaultWorkingDirectory)/OpenJDK8_jre_x64_windows.zip'
+#     jdkDestinationDirectory: '$(System.DefaultWorkingDirectory)/jre'
+#     cleanDestinationDirectory: true
 
-- task: PowerShell@2
-  inputs:
-    targetType: 'inline'
-    script: |
-      git clone https://github.com/hugh-whitesource/aspnetcore-realworld-example-app.git
-      cd aspnetcore-realworld-example-app
-      git checkout 93ed4ba61b600509b62ace9cf57d3c7ccb9f2c96
+# - task: PowerShell@2
+#   inputs:
+#     targetType: 'inline'
+#     script: |
+#       git clone https://github.com/hugh-whitesource/aspnetcore-realworld-example-app.git
+#       cd aspnetcore-realworld-example-app
+#       git checkout 93ed4ba61b600509b62ace9cf57d3c7ccb9f2c96
 
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'build'
-    projects: '**/*.csproj'
+# - task: DotNetCoreCLI@2
+#   inputs:
+#     command: 'build'
+#     projects: '**/*.csproj'
 
 - task: WhiteSource@21
   inputs:
     projectName: 'AZDO_aspnetcore-721'
+    configuration: |
+     generateScanReport=true
+     scanReportFilenameFormat=static
+
+- task: SendEmail@1
+  inputs:
+    To: 'xinyuan.guo@whitesourcesoftware.com'
+    From: 'xinyuan.guo@whitesourcesoftware.com'
+    Subject: 'AZDO Email Notification'
+    Body: 'Build completed'
+    BodyAsHtml: false
+    AddAttachment: true
